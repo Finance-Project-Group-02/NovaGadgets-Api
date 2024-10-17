@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class FacturaController {
     @Autowired
     FacturaService facturaService;
 
-    @PostMapping("/facturas")
-    public ResponseEntity<FacturaResponseDTO> addFactura(@Valid @RequestBody FacturaRequestDTO facturaRequestDTO) {
-        return new ResponseEntity<FacturaResponseDTO>(facturaService.addFactura(facturaRequestDTO), HttpStatus.CREATED);
+    @PutMapping("/facturas/{id}")
+    public ResponseEntity<FacturaResponseDTO> updateFactura(@PathVariable("id")Integer id, @Valid @RequestBody FacturaRequestDTO facturaRequestDTO) {
+        return new ResponseEntity<FacturaResponseDTO>(facturaService.updateFactura(id,facturaRequestDTO), HttpStatus.OK);
     }
 
     @GetMapping("/facturas")
@@ -37,5 +37,15 @@ public class FacturaController {
     public ResponseEntity<String> deleteFactura(@PathVariable("id")Integer id){
         facturaService.deleteFactura(id);
         return new ResponseEntity<>("Factura deleted successfull", HttpStatus.OK);
+    }
+
+    @GetMapping("/facturas/user/{id}")
+    public ResponseEntity<List<FacturaEntity>> getFacturasByUserId(@PathVariable("id") Integer id){
+        return new ResponseEntity<List<FacturaEntity>>(facturaService.findFacturasByUserId(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/facturas/user/{id}/state/{state}")
+    public ResponseEntity<List<FacturaEntity>> getFacturasByUserAndState(@PathVariable("id") Integer id,@PathVariable("state") String state){
+        return new ResponseEntity<List<FacturaEntity>>(facturaService.findFacturasByUserIdAndState(id,state), HttpStatus.OK);
     }
 }

@@ -1,5 +1,8 @@
 package com.Group_02.NovaGadgets_Api.factura.model;
 
+import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
+import com.Group_02.NovaGadgets_Api.user.model.UsersEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,25 +26,25 @@ public class FacturaEntity {
     @Column(name = "state", nullable = false)
     private String state;
     //Datos de Entrada
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date", nullable = true)
     private LocalDate startDate;
-    @Column(name = "payment_date", nullable = false)
+    @Column(name = "payment_date", nullable = true)
     private LocalDate paymentDate;
-    @Column(name = "discount_date", nullable = false)
+    @Column(name = "discount_date", nullable = true)
     private LocalDate discountDate;
-    @Column(name = "retention", nullable = false)
+    @Column(name = "retention", nullable = true)
     private Double retention;
-    @Column(name = "effective_rate", nullable = false)
+    @Column(name = "effective_rate", nullable = true)
     private Double effectiveRate;
-    @Column(name = "rate_term", nullable = false)
+    @Column(name = "rate_term", nullable = true)
     private Integer rateTerm;
-    @Column(name = "day_by_year", nullable = false)
+    @Column(name = "day_by_year", nullable = true)
     private Character dayByYear;
     @Column(name = "total_invoiced", nullable = false)
     private Double totalInvoiced;
-    @Column(name = "initial_costs", nullable = false)
+    @Column(name = "initial_costs", nullable = true)
     private Double initialCosts;
-    @Column(name = "final_costs", nullable = false)
+    @Column(name = "final_costs", nullable = true)
     private Double finalCosts;
 
     //Datos de Salida (null temporal)
@@ -61,4 +64,9 @@ public class FacturaEntity {
     private Double valueReceived;
     @Column(name = "tcea", nullable = true)
     private Double tcea;
+
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderEntity order;
 }

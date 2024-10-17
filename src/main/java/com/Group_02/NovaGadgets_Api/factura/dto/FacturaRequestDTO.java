@@ -46,10 +46,6 @@ public class FacturaRequestDTO {
     @NotNull(message = "DayByYear cannot be null")
     private Character dayByYear;
 
-    @Positive(message = "TotalInvoiced must be positive")
-    @NotNull(message = "TotalInvoiced cannot be null")
-    private Double totalInvoiced;
-
     @NotNull(message = "InitialCosts cannot be null")
     private List<Double> initialCosts;
 

@@ -5,6 +5,8 @@ import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.factura.repository.FacturaRepository;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
+import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
+import com.Group_02.NovaGadgets_Api.order.repository.OrderRepository;
 import com.Group_02.NovaGadgets_Api.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,15 +22,29 @@ public class FacturaServiceImpl implements FacturaService {
     @Autowired
     private FacturaRepository facturaRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     @Override
-    public FacturaResponseDTO addFactura(FacturaRequestDTO facturaRequestDTO) {
-        Double totalInvoiced = facturaRequestDTO.getTotalInvoiced();
+    public void addFactura(Double totalInvoiced, OrderEntity order) {
+        FacturaEntity factura = new FacturaEntity();
+        factura.setState("PENDIENTE");
+        factura.setTotalInvoiced(totalInvoiced);
+        factura.setOrder(order);
+        facturaRepository.save(factura);
+    }
+
+    @Override
+    public FacturaResponseDTO updateFactura(Integer id, FacturaRequestDTO facturaRequestDTO) {
+        FacturaEntity facturaFound = getFacturaById(id);
+
+        Double totalInvoiced = facturaFound.getTotalInvoiced();
         Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
         Double nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
         nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
         Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
         tasaDescontada = redondear(tasaDescontada,7);
-        Double discount = facturaRequestDTO.getTotalInvoiced()*tasaDescontada/100;
+        Double discount = totalInvoiced*tasaDescontada/100;
         discount = redondear(discount,2);
         Double netWorth = totalInvoiced - discount;
         netWorth = redondear(netWorth,2);
@@ -54,12 +70,28 @@ public class FacturaServiceImpl implements FacturaService {
                 days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
                 netWorth, valueReceived, valueDelivered, tcea);
 
-        FacturaEntity factura = new FacturaEntity(0, facturaRequestDTO.getState(), facturaRequestDTO.getStartDate(), facturaRequestDTO.getPaymentDate(), facturaRequestDTO.getDiscountDate(),
-                facturaRequestDTO.getRetention(),facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), facturaRequestDTO.getDayByYear(),
-                totalInvoiced, initialCosts, finalCosts, days, nuevaTasaEfectiva, tasaDescontada, discount, netWorth,
-                valueDelivered, valueReceived, tcea);
 
-        facturaRepository.save(factura);
+        facturaFound.setState(facturaRequestDTO.getState());
+        facturaFound.setStartDate(facturaRequestDTO.getStartDate());
+        facturaFound.setPaymentDate(facturaRequestDTO.getPaymentDate());
+        facturaFound.setDiscountDate(facturaRequestDTO.getDiscountDate());
+        facturaFound.setRetention(facturaRequestDTO.getRetention());
+        facturaFound.setEffectiveRate(facturaRequestDTO.getEffectiveRate());
+        facturaFound.setRateTerm(facturaRequestDTO.getRateTerm());
+        facturaFound.setDayByYear(facturaRequestDTO.getDayByYear());
+        facturaFound.setInitialCosts(initialCosts);
+        facturaFound.setFinalCosts(finalCosts);
+        facturaFound.setDays(days);
+        facturaFound.setNewEffectiveRate(nuevaTasaEfectiva);
+        facturaFound.setDiscountedRate(tasaDescontada);
+        facturaFound.setDiscount(discount);
+        facturaFound.setNetWorth(netWorth);
+        facturaFound.setValueDelivered(valueDelivered);
+        facturaFound.setValueReceived(valueReceived);
+        facturaFound.setTcea(tcea);
+
+        facturaRepository.save(facturaFound);
+
         return facturaResponseDTO;
     }
 
@@ -102,6 +134,15 @@ public class FacturaServiceImpl implements FacturaService {
     }
 
     @Override
+    public FacturaEntity getFacturaById(Integer id) {
+        FacturaEntity factura = facturaRepository.findById(id).orElse(null);
+        if (factura==null) {
+            throw new ResourceNotFoundException("Factura no encontrado");
+        }
+        return factura;
+    }
+
+    @Override
     public List<FacturaEntity> getAll() {
         return facturaRepository.findAll();
     }
@@ -109,5 +150,15 @@ public class FacturaServiceImpl implements FacturaService {
     @Override
     public List<FacturaEntity> getByState(String state) {
         return facturaRepository.findByState(state);
+    }
+
+    @Override
+    public List<FacturaEntity> findFacturasByUserId(Integer id) {
+        return facturaRepository.findFacturasByUserId(id);
+    }
+
+    @Override
+    public List<FacturaEntity> findFacturasByUserIdAndState(Integer id, String state) {
+        return facturaRepository.findFacturasByUserIdAndState(id,state);
     }
 }
