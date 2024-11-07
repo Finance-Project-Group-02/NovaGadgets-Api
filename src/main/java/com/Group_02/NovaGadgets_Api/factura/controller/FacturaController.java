@@ -2,6 +2,7 @@ package com.Group_02.NovaGadgets_Api.factura.controller;
 
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1")
 public class FacturaController {
@@ -47,5 +49,20 @@ public class FacturaController {
     @GetMapping("/facturas/user/{id}/state/{state}")
     public ResponseEntity<List<FacturaEntity>> getFacturasByUserAndState(@PathVariable("id") Integer id,@PathVariable("state") String state){
         return new ResponseEntity<List<FacturaEntity>>(facturaService.findFacturasByUserIdAndState(id,state), HttpStatus.OK);
+    }
+
+    @PutMapping("/facturas/simular/{id}")
+    public ResponseEntity<FacturaResponseDTO> simularFactura(@PathVariable("id")Integer id, @Valid @RequestBody FacturaRequestDTO facturaRequestDTO) {
+        return new ResponseEntity<FacturaResponseDTO>(facturaService.simularFactura(id,facturaRequestDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/facturas/summaries")
+    public ResponseEntity<List<FacturaSummaryDTO>> getAllFacturasSummaries(){
+        return new ResponseEntity<List<FacturaSummaryDTO>>(facturaService.getAllSummary(), HttpStatus.OK);
+    }
+
+    @GetMapping("/facturas/summary/{id}")
+    public ResponseEntity<FacturaSummaryDTO> getAllFacturasSummaries(@PathVariable("id")Integer id){
+        return new ResponseEntity<FacturaSummaryDTO>(facturaService.getFacturaSummary(id), HttpStatus.OK);
     }
 }

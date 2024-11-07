@@ -11,4 +11,6 @@ public interface ProductService {
     public abstract void deleteProduct(Integer id);
     public abstract List<ProductEntity> getAllProduct();
     public abstract ProductEntity GetById(Integer id);
+
+    public abstract List<ProductDTO> getAllProductsResponse();
 }

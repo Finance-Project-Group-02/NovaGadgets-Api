@@ -16,6 +16,7 @@ import com.Group_02.NovaGadgets_Api.store.repository.StoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -82,5 +83,35 @@ public class ProductServiceImpl implements ProductService {
             throw new ResourceNotFoundException("Product no encontrado");
         }
         return product;
+    }
+
+    @Override
+    public List<ProductDTO> getAllProductsResponse() {
+        List<ProductEntity> list = productRepository.findAll();
+        List<ProductDTO> productDTOS = new ArrayList<>();
+
+        for (ProductEntity product : list) {
+            List<ProductStoreEntity> productStores = productStoreRepository.findProductStoreByProductId(product.getId());
+
+            for (ProductStoreEntity productStore : productStores) {
+                ProductDTO productDTO = new ProductDTO();
+
+                productDTO.setId(product.getId());
+                productDTO.setName(product.getName());
+                productDTO.setImage(product.getImage());
+                productDTO.setDetails(product.getDetails());
+                productDTO.setCategoryName(product.getCategory().getName());
+
+                StoreEntity store = storeRepository.findById(productStore.getStore().getId()).orElse(null);
+
+                if (store != null) {
+                    productDTO.setStoreName(store.getName());
+                    productDTO.setPrice(productStore.getPrice());
+                    productDTO.setQuantity(productStore.getQuantity());
+                }
+                productDTOS.add(productDTO);
+            }
+        }
+        return productDTOS;
     }
 }

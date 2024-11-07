@@ -2,12 +2,15 @@ package com.Group_02.NovaGadgets_Api.factura.service.impl;
 
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.factura.repository.FacturaRepository;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
 import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
 import com.Group_02.NovaGadgets_Api.order.repository.OrderRepository;
 import com.Group_02.NovaGadgets_Api.shared.exception.ResourceNotFoundException;
+import com.Group_02.NovaGadgets_Api.user.model.UsersEntity;
+import com.Group_02.NovaGadgets_Api.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +28,9 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public void addFactura(Double totalInvoiced, OrderEntity order) {
@@ -160,5 +167,73 @@ public class FacturaServiceImpl implements FacturaService {
     @Override
     public List<FacturaEntity> findFacturasByUserIdAndState(Integer id, String state) {
         return facturaRepository.findFacturasByUserIdAndState(id,state);
+    }
+
+    @Override
+    public FacturaResponseDTO simularFactura(Integer id, FacturaRequestDTO facturaRequestDTO) {
+        FacturaEntity facturaFound = getFacturaById(id);
+
+        Double totalInvoiced = facturaFound.getTotalInvoiced();
+        Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
+        Double nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
+        nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
+        Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
+        tasaDescontada = redondear(tasaDescontada,7);
+        Double discount = totalInvoiced*tasaDescontada/100;
+        discount = redondear(discount,2);
+        Double netWorth = totalInvoiced - discount;
+        netWorth = redondear(netWorth,2);
+        Double initialCosts = 0.0;
+        for (Double cost : facturaRequestDTO.getInitialCosts()) {
+            initialCosts += cost;
+        }
+
+        Double finalCosts = 0.0;
+        for (Double cost : facturaRequestDTO.getFinalCosts()) {
+            finalCosts += cost;
+        }
+
+        Double valueReceived = netWorth - initialCosts - facturaRequestDTO.getRetention();
+        Double valueDelivered = totalInvoiced + finalCosts - facturaRequestDTO.getRetention();
+
+        valueReceived = redondear(valueReceived,2);
+        valueDelivered = redondear(valueDelivered,2);
+        Double tcea = calcularTCEA(valueReceived,valueDelivered, days);
+        tcea = redondear(tcea,7);
+
+        FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced, facturaRequestDTO.getPaymentDate(),
+                days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
+                netWorth, valueReceived, valueDelivered, tcea);
+
+        return  facturaResponseDTO;
+    }
+
+    @Override
+    public List<FacturaSummaryDTO> getAllSummary() {
+        List<FacturaEntity> list =facturaRepository.findAll();
+        List<FacturaSummaryDTO> summaries = new ArrayList<>();
+
+        for(FacturaEntity factura : list){
+            OrderEntity order = orderRepository.findById(factura.getOrder().getId()).orElse(null);
+            UsersEntity user = userRepository.findById(order.getUser().getId());
+
+            FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
+                    user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());
+
+            summaries.add(facturaSummaryDTO);
+        }
+        return summaries;
+    }
+
+    @Override
+    public FacturaSummaryDTO getFacturaSummary(Integer id) {
+        FacturaEntity factura = getFacturaById(id);
+        OrderEntity order = orderRepository.findById(factura.getOrder().getId()).orElse(null);
+        UsersEntity user = userRepository.findById(order.getUser().getId());
+
+        FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
+                user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());
+
+        return facturaSummaryDTO;
     }
 }

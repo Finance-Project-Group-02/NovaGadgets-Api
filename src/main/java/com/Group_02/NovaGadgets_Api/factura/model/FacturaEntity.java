@@ -39,7 +39,7 @@ public class FacturaEntity {
     @Column(name = "rate_term", nullable = true)
     private Integer rateTerm;
     @Column(name = "day_by_year", nullable = true)
-    private Character dayByYear;
+    private String dayByYear;
     @Column(name = "total_invoiced", nullable = false)
     private Double totalInvoiced;
     @Column(name = "initial_costs", nullable = true)

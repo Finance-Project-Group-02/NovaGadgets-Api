@@ -38,4 +38,9 @@ public class ProductController {
     public ResponseEntity<ProductEntity> getProductById(@PathVariable("id")Integer id){
         return new ResponseEntity<ProductEntity>(productService.GetById(id), HttpStatus.OK);
     }
+
+    @GetMapping("/products/response")
+    public ResponseEntity<List<ProductDTO>> getAllProductsResponse(){
+        return new ResponseEntity<List<ProductDTO>>(productService.getAllProductsResponse(), HttpStatus.OK);
+    }
 }

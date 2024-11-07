@@ -44,7 +44,7 @@ public class FacturaRequestDTO {
     private Integer rateTerm;
 
     @NotNull(message = "DayByYear cannot be null")
-    private Character dayByYear;
+    private String dayByYear;
 
     @NotNull(message = "InitialCosts cannot be null")
     private List<Double> initialCosts;
