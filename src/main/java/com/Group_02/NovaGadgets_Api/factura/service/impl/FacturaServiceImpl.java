@@ -47,7 +47,16 @@ public class FacturaServiceImpl implements FacturaService {
 
         Double totalInvoiced = facturaFound.getTotalInvoiced();
         Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
-        Double nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
+        String type = facturaRequestDTO.getType();
+
+        Double nuevaTasaEfectiva = 0.0;
+        if(type.equals("E")){
+            nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
+        }
+        if(type.equals("N")){
+            nuevaTasaEfectiva = calcularNuevaTasaEfectivaDeNominal(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(),
+                    days,facturaRequestDTO.getCapitalization());
+        }
         nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
         Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
         tasaDescontada = redondear(tasaDescontada,7);
@@ -75,7 +84,7 @@ public class FacturaServiceImpl implements FacturaService {
 
         FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced, facturaRequestDTO.getPaymentDate(),
                 days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
-                netWorth, valueReceived, valueDelivered, tcea);
+                netWorth, valueDelivered, valueReceived, tcea);
 
 
         facturaFound.setState(facturaRequestDTO.getState());
@@ -111,6 +120,14 @@ public class FacturaServiceImpl implements FacturaService {
         Double division = (double) days / (double) rateTerm;
         Double parte = (1+effectiveRate/100);
         Double nuevaTasaEfectiva = Math.pow(parte,division) - 1;
+        return nuevaTasaEfectiva * 100;
+    }
+
+    public Double calcularNuevaTasaEfectivaDeNominal(Double effectiveRate, Integer rateTerm, Integer days, Integer capitalization){
+        Double m = (double) rateTerm / capitalization;
+        Double n = (double) days / capitalization;
+        Double division = (effectiveRate / 100) / m;
+        Double nuevaTasaEfectiva = Math.pow(1 + division, n) - 1;
         return nuevaTasaEfectiva * 100;
     }
 
@@ -175,7 +192,15 @@ public class FacturaServiceImpl implements FacturaService {
 
         Double totalInvoiced = facturaFound.getTotalInvoiced();
         Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
-        Double nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
+        String type = facturaRequestDTO.getType();
+        Double nuevaTasaEfectiva = 0.0;
+        if(type.equals("E")){
+            nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
+        }
+        if(type.equals("N")){
+            nuevaTasaEfectiva = calcularNuevaTasaEfectivaDeNominal(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(),
+                    days,facturaRequestDTO.getCapitalization());
+        }
         nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
         Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
         tasaDescontada = redondear(tasaDescontada,7);
@@ -203,7 +228,7 @@ public class FacturaServiceImpl implements FacturaService {
 
         FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced, facturaRequestDTO.getPaymentDate(),
                 days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
-                netWorth, valueReceived, valueDelivered, tcea);
+                netWorth, valueDelivered, valueReceived, tcea);
 
         return  facturaResponseDTO;
     }

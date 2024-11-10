@@ -35,9 +35,15 @@ public class FacturaRequestDTO {
     @NotNull(message = "Retention cannot be null")
     private Double retention;
 
+    @NotNull(message = "Type cannot be null")
+    private String type;
+
     @Positive(message = "EffectiveRate must be positive")
     @NotNull(message = "EffectiveRate cannot be null")
     private Double effectiveRate;
+
+    @NotNull(message = "Capitalization cannot be null")
+    private Integer capitalization;
 
     @Positive(message = "RateTerm must be positive")
     @NotNull(message = "RateTerm cannot be null")
