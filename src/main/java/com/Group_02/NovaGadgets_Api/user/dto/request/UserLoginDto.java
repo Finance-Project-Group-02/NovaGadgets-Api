@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class UserLoginDto {
 
     @NotBlank(message = "Email cannot be blank")
-    @Email(message = "Email must be valid")
+    //@Email(message = "Email must be valid")
     private String email;
 
     @NotBlank(message = "Password cannot be blank")

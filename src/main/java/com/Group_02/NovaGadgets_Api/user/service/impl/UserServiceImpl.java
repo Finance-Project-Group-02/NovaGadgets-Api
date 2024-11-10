@@ -35,9 +35,8 @@ public class UserServiceImpl implements UserService{
         List<RolesEntity> managedRoles = new ArrayList<>();
 
         for (RolesEntity role : user.getRoles()) {
-            RolesEntity managedRole = roleRepository.findById(role.getId()).orElseThrow(() ->
-                    new ResourceNotFoundException("Role not found with id: " + role.getId())
-            );
+            RolesEntity managedRole = roleRepository.findByNameRole(role.getNameRole())
+                    .orElseThrow(() -> new ResourceNotFoundException("Role not found with name: " + role.getNameRole()));
             managedRoles.add(managedRole);
         }
 
