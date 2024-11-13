@@ -65,4 +65,9 @@ public class FacturaController {
     public ResponseEntity<FacturaSummaryDTO> getAllFacturasSummaries(@PathVariable("id")Integer id){
         return new ResponseEntity<FacturaSummaryDTO>(facturaService.getFacturaSummary(id), HttpStatus.OK);
     }
+
+    @PostMapping("/facturas/TCEACartera")
+    public ResponseEntity<Double> getTCEACarteraFactura(@RequestBody List<Integer> idFacturas){
+        return new ResponseEntity<Double>(facturaService.getTCEACartera(idFacturas), HttpStatus.OK);
+    }
 }

@@ -30,4 +30,6 @@ public interface FacturaService {
     public abstract List<FacturaSummaryDTO> getAllSummary();
 
     public abstract FacturaSummaryDTO getFacturaSummary(Integer id);
+
+    public abstract Double getTCEACartera(List<Integer> idFacturas);
 }
