@@ -30,7 +30,7 @@ public class ProductDTO {
 
     @NotNull(message = "Image cannot be null")
     @NotBlank(message = "Image cannot be blank")
-    @Size(min = 2, max = 100, message = "Image must be between 2 and 100 characters")
+    @Size(min = 2, max = 300, message = "Image must be between 2 and 100 characters")
     private String image;
 
     @NotNull(message = "Details cannot be null")

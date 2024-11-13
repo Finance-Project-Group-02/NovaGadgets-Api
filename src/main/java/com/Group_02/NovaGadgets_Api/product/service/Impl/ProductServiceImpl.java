@@ -114,4 +114,33 @@ public class ProductServiceImpl implements ProductService {
         }
         return productDTOS;
     }
+
+    @Override
+    public ProductDTO getProductById(Integer id) {
+        ProductEntity product = productRepository.findById(id).orElse(null);
+        if(product == null){
+            throw new ResourceNotFoundException("Product no encontrado");
+        }
+
+        List<ProductStoreEntity> productStores = productStoreRepository.findProductStoreByProductId(product.getId());
+
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setId(product.getId());
+        productDTO.setName(product.getName());
+        productDTO.setImage(product.getImage());
+        productDTO.setDetails(product.getDetails());
+        productDTO.setCategoryName(product.getCategory().getName());
+
+        for (ProductStoreEntity productStore : productStores) {
+            StoreEntity store = storeRepository.findById(productStore.getStore().getId()).orElse(null);
+            if (store != null) {
+                productDTO.setStoreName(store.getName());
+                productDTO.setPrice(productStore.getPrice());
+                productDTO.setQuantity(productStore.getQuantity());
+            }
+        }
+
+        return productDTO;
+    }
+
 }

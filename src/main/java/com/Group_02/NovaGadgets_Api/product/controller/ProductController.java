@@ -43,4 +43,9 @@ public class ProductController {
     public ResponseEntity<List<ProductDTO>> getAllProductsResponse(){
         return new ResponseEntity<List<ProductDTO>>(productService.getAllProductsResponse(), HttpStatus.OK);
     }
+
+    @GetMapping("/products/response/id/{id}")
+    public ResponseEntity<ProductDTO> getProductByIdResponse(@PathVariable("id")Integer id){
+        return new ResponseEntity<ProductDTO>(productService.getProductById(id), HttpStatus.OK);
+    }
 }
