@@ -2,10 +2,14 @@ package com.Group_02.NovaGadgets_Api;
 
 import com.Group_02.NovaGadgets_Api.category.model.CategoryEntity;
 import com.Group_02.NovaGadgets_Api.category.repository.CategoryRepository;
+import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootApplication
 public class NovaGadgetsApiApplication {

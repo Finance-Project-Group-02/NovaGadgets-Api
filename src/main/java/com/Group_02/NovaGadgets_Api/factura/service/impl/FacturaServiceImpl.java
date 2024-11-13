@@ -261,4 +261,48 @@ public class FacturaServiceImpl implements FacturaService {
 
         return facturaSummaryDTO;
     }
+
+    @Override
+    public Double getTCEACartera(List<Integer> idFacturas) {
+        List<Double> flujos = new ArrayList<>();
+        List<Integer> dias = new ArrayList<>();
+        double precision = 0.00000001;
+
+        for (Integer id : idFacturas) {
+            FacturaEntity factura = getFacturaById(id);
+            flujos.add(factura.getValueReceived() * -1);
+            flujos.add(factura.getValueDelivered());
+            dias.add(0);
+            dias.add(factura.getDays());
+        }
+
+        double tirmMin = 0.000001;
+        double tirmMax = 1.0;
+        double tirmMedio;
+        int maxIteraciones = 10000;
+        int iteracion = 0;
+
+        while (iteracion < maxIteraciones) {
+            tirmMedio = (tirmMin + tirmMax) / 2.0;
+            double flujoDescontado = 0.0;
+
+            for (int i = 0; i < flujos.size(); i++) {
+                flujoDescontado += flujos.get(i) / Math.pow(1 + tirmMedio, (double) dias.get(i) / 360.0);
+            }
+
+            if (Math.abs(flujoDescontado) < precision) {
+                BigDecimal result = new BigDecimal(tirmMedio * 100).setScale(7, RoundingMode.HALF_UP);
+                return result.doubleValue();
+            }
+
+            if (flujoDescontado > 0) {
+                tirmMin = tirmMedio;
+            } else {
+                tirmMax = tirmMedio;
+            }
+
+            iteracion++;
+        }
+        return null;
+    }
 }
