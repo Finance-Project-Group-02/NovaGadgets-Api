@@ -1,15 +1,21 @@
 package com.Group_02.NovaGadgets_Api.orderDetail.service.Impl;
 
+import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
 import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
+import com.Group_02.NovaGadgets_Api.order.repository.OrderRepository;
 import com.Group_02.NovaGadgets_Api.order.service.OrderService;
+import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrdenDetailRequestDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrderDetailDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.model.OrderDetailEntity;
 import com.Group_02.NovaGadgets_Api.orderDetail.repository.OrderDetailRepository;
 import com.Group_02.NovaGadgets_Api.orderDetail.service.OrderDetailService;
 import com.Group_02.NovaGadgets_Api.product.model.ProductEntity;
 import com.Group_02.NovaGadgets_Api.product.service.ProductService;
+import com.Group_02.NovaGadgets_Api.productStore.repository.ProductStoreRepository;
 import com.Group_02.NovaGadgets_Api.shared.exception.ResourceNotFoundException;
 import com.Group_02.NovaGadgets_Api.shared.exception.ValidationException;
+import com.Group_02.NovaGadgets_Api.user.model.UsersEntity;
+import com.Group_02.NovaGadgets_Api.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +32,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    FacturaService facturaService;
+
+    @Autowired
+    ProductStoreRepository productStoreRepository;
 
     public OrderDetailEntity getById(Integer id){
         OrderDetailEntity orderDetailEntity = orderDetailRepository.findById(id).orElse(null);
@@ -100,5 +118,28 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             return listDuplicados.get(0).getId();
         }
         return null;
+    }
+
+    public void createOrdenWithOrderDetailByProducts(int userId, List<OrdenDetailRequestDTO> orderDetailDTOList){
+        UsersEntity userFound = userRepository.findById(userId).orElse(null);
+        if(userFound == null){
+            throw new ResourceNotFoundException("User no encontrado");
+        }
+
+        OrderEntity order = new OrderEntity(0, java.time.LocalDate.now(),userFound);
+
+        order = orderRepository.save(order);
+
+        double totalInvoiced = 0;
+
+        for(OrdenDetailRequestDTO orderDetailDTO: orderDetailDTOList){
+            ProductEntity product = productService.GetById(orderDetailDTO.getProductId());
+            OrderDetailEntity orderDetailEntity = new OrderDetailEntity(0,orderDetailDTO.getQuantity(),
+                    order,product);
+            totalInvoiced += orderDetailDTO.getQuantity()*orderDetailDTO.getProductPrice();
+            orderDetailRepository.save(orderDetailEntity);
+        }
+
+        facturaService.addFactura(totalInvoiced,order);
     }
 }

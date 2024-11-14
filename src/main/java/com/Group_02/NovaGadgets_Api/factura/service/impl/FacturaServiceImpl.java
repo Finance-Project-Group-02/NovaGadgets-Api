@@ -240,7 +240,7 @@ public class FacturaServiceImpl implements FacturaService {
 
         for(FacturaEntity factura : list){
             OrderEntity order = orderRepository.findById(factura.getOrder().getId()).orElse(null);
-            UsersEntity user = userRepository.findById(order.getUser().getId());
+            UsersEntity user = userRepository.findById(order.getUser().getId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
                     user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());
@@ -254,7 +254,7 @@ public class FacturaServiceImpl implements FacturaService {
     public FacturaSummaryDTO getFacturaSummary(Integer id) {
         FacturaEntity factura = getFacturaById(id);
         OrderEntity order = orderRepository.findById(factura.getOrder().getId()).orElse(null);
-        UsersEntity user = userRepository.findById(order.getUser().getId());
+        UsersEntity user = userRepository.findById(order.getUser().getId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
                 user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());

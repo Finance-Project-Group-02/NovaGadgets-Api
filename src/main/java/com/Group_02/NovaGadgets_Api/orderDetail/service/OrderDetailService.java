@@ -1,5 +1,6 @@
 package com.Group_02.NovaGadgets_Api.orderDetail.service;
 
+import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrdenDetailRequestDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrderDetailDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.model.OrderDetailEntity;
 
@@ -10,4 +11,5 @@ public interface OrderDetailService {
     public OrderDetailEntity addOrderDetail(Integer orderId, OrderDetailDTO orderDetailDTO);
     public List<OrderDetailDTO> listOrderDetailByOrderId(Integer orderId);
     public OrderDetailEntity updateOrderDetail(Integer orderDetailId, OrderDetailDTO orderDetailDTO);
+    public void createOrdenWithOrderDetailByProducts(int userId, List<OrdenDetailRequestDTO> orderDetailDTOList);
 }

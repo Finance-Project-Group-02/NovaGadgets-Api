@@ -17,4 +17,6 @@ public interface ProductStoreRepository extends JpaRepository<ProductStoreEntity
             "SELECT i.* FROM product_store i " +
             "WHERE i.store_id = :storeId")
     List<ProductStoreEntity> findProductStoreByStoreId(@Param("storeId") Integer storeId);
+
+    ProductStoreEntity findByProductIdAndStoreId(Integer productId, Integer storeId);
 }

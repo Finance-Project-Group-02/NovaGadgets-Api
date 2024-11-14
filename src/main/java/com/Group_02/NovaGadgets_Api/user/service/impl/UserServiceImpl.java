@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService{
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
 
-        UsersEntity userEntity = userRepository.findById(id);
+        UsersEntity userEntity = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return modelMapper.map(userEntity, UserReponseDto.class);
     }
 

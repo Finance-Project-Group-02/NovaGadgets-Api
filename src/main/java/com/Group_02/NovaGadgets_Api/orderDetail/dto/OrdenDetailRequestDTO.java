@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDetailDTO {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Integer id;
-
+public class OrdenDetailRequestDTO {
     @Positive(message = "Quantity must be positive")
     private Integer quantity;
 
     @Positive(message = "ProductId must be positive")
     private Integer productId;
+
+    @Positive(message = "Price must be positive")
+    private Double productPrice;
 }

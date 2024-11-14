@@ -2,15 +2,14 @@ package com.Group_02.NovaGadgets_Api.order.model;
 
 import com.Group_02.NovaGadgets_Api.user.model.UsersEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.catalina.User;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @Builder
@@ -24,6 +23,7 @@ public class OrderEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "order_date", nullable = false)
     private LocalDate orderDate;
 

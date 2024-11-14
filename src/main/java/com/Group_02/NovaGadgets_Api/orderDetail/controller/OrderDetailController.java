@@ -2,6 +2,7 @@ package com.Group_02.NovaGadgets_Api.orderDetail.controller;
 
 import com.Group_02.NovaGadgets_Api.order.dto.OrderDTO;
 import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
+import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrdenDetailRequestDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.dto.OrderDetailDTO;
 import com.Group_02.NovaGadgets_Api.orderDetail.model.OrderDetailEntity;
 import com.Group_02.NovaGadgets_Api.orderDetail.service.OrderDetailService;
@@ -39,5 +40,11 @@ public class OrderDetailController {
     @PutMapping("/orderDetail/id/{id}")
     public ResponseEntity<OrderDetailEntity> updateOrderDetail(@PathVariable("id")Integer id, @Valid @RequestBody OrderDetailDTO orderDetailDTO){
         return new ResponseEntity<OrderDetailEntity>(orderDetailService.updateOrderDetail(id, orderDetailDTO), HttpStatus.OK);
+    }
+
+    @PostMapping("/orderDetail/userId/{userId}")
+    public ResponseEntity<String> createOrdenWithOrderDetailByProducts(@PathVariable("userId")Integer userId, @Valid @RequestBody List<OrdenDetailRequestDTO> orderDetailDTOList){
+        orderDetailService.createOrdenWithOrderDetailByProducts(userId, orderDetailDTOList);
+        return new ResponseEntity<>("Orden creada con detalle de orden por productos", HttpStatus.CREATED);
     }
 }

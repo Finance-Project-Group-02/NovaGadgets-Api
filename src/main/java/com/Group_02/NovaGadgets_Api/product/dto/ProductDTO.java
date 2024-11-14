@@ -1,11 +1,5 @@
 package com.Group_02.NovaGadgets_Api.product.dto;
 
-import com.Group_02.NovaGadgets_Api.category.model.CategoryEntity;
-import com.Group_02.NovaGadgets_Api.store.model.StoreEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
