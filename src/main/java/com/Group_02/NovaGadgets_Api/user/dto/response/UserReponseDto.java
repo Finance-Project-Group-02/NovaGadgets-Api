@@ -1,15 +1,13 @@
 package com.Group_02.NovaGadgets_Api.user.dto.response;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.Group_02.NovaGadgets_Api.user.dto.RoleDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,5 +23,21 @@ public class UserReponseDto {
 
     private String address;
 
+    private String email;
+
+    private String username;
+
+    private LocalDate birthday;
+
+    private String phoneNumber;
+
+    private String dni;
+
+    private Character gender;
+
+    private String ruc;
+
     private String currencyType;
+
+    private List<RoleDTO> roles;
 }

@@ -91,6 +91,25 @@ public class UserServiceImpl implements UserService{
         return modelMapper.map(userEntity, UserReponseDto.class);
     }
 
+    @Override
+    public UserReponseDto updateCurrencyType(int id, String currencyType) {
+        UsersEntity userEntity = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (currencyType == null || currencyType.isEmpty()) {
+            throw new ValidationException("Currency type is required");
+        }
+
+        if (!currencyType.equals("USD") && !currencyType.equals("PEN")) {
+            throw new ValidationException("Invalid currency type");
+        }
+
+        userEntity.setCurrencyType(currencyType);
+        userRepository.save(userEntity);
+
+        return modelMapper.map(userEntity, UserReponseDto.class);
+    }
+
+
     private void validateUser(UsersEntity user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new ValidationException("Email already exists");

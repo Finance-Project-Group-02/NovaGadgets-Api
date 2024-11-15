@@ -13,4 +13,5 @@ public interface UserService {
     public abstract UserReponseDto login(UserLoginDto user);
     public abstract void deleteUser(int id);
     public abstract UserReponseDto getUserById(int id);
+    public abstract UserReponseDto updateCurrencyType(int id, String currencyType);
 }

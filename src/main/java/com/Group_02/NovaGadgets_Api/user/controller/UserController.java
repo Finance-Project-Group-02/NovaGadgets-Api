@@ -61,4 +61,12 @@ public class UserController {
     public ResponseEntity<UserReponseDto> login(@Valid @RequestBody UserLoginDto user) {
         return new ResponseEntity<UserReponseDto>(userService.login(user), HttpStatus.CREATED);
     }
+
+    //URL: http://localhost:8080/api/v1/users/{id}/currency-type/{currencyType}
+    //Method: PUT
+    @Transactional
+    @PutMapping("/users/{id}/currency-type/{currencyType}")
+    public ResponseEntity<UserReponseDto> updateCurrencyType(@PathVariable int id, @PathVariable String currencyType) {
+        return new ResponseEntity<UserReponseDto>(userService.updateCurrencyType(id, currencyType), HttpStatus.OK);
+    }
 }
