@@ -3,6 +3,7 @@ package com.Group_02.NovaGadgets_Api.factura.service.impl;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.TCEACarteraDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.factura.repository.FacturaRepository;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
@@ -37,6 +38,7 @@ public class FacturaServiceImpl implements FacturaService {
         FacturaEntity factura = new FacturaEntity();
         factura.setState("PENDIENTE");
         factura.setTotalInvoiced(totalInvoiced);
+        factura.setNominalValue(redondear(totalInvoiced*0.82,2));
         factura.setOrder(order);
         facturaRepository.save(factura);
     }
@@ -46,6 +48,8 @@ public class FacturaServiceImpl implements FacturaService {
         FacturaEntity facturaFound = getFacturaById(id);
 
         Double totalInvoiced = facturaFound.getTotalInvoiced();
+        Double nominalValue = facturaFound.getNominalValue();
+        Integer dayYear = facturaRequestDTO.getDayByYear();
         Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
         String type = facturaRequestDTO.getType();
 
@@ -60,9 +64,9 @@ public class FacturaServiceImpl implements FacturaService {
         nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
         Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
         tasaDescontada = redondear(tasaDescontada,7);
-        Double discount = totalInvoiced*tasaDescontada/100;
+        Double discount = nominalValue*tasaDescontada/100;
         discount = redondear(discount,2);
-        Double netWorth = totalInvoiced - discount;
+        Double netWorth = nominalValue - discount;
         netWorth = redondear(netWorth,2);
         Double initialCosts = 0.0;
         for (Double cost : facturaRequestDTO.getInitialCosts()) {
@@ -75,14 +79,14 @@ public class FacturaServiceImpl implements FacturaService {
         }
 
         Double valueReceived = netWorth - initialCosts - facturaRequestDTO.getRetention();
-        Double valueDelivered = totalInvoiced + finalCosts - facturaRequestDTO.getRetention();
+        Double valueDelivered = nominalValue + finalCosts - facturaRequestDTO.getRetention();
 
         valueReceived = redondear(valueReceived,2);
         valueDelivered = redondear(valueDelivered,2);
-        Double tcea = calcularTCEA(valueReceived,valueDelivered, days);
+        Double tcea = calcularTCEA(valueReceived,valueDelivered, days,dayYear);
         tcea = redondear(tcea,7);
 
-        FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced, facturaRequestDTO.getPaymentDate(),
+        FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced,nominalValue, facturaRequestDTO.getPaymentDate(),
                 days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
                 netWorth, valueDelivered, valueReceived, tcea);
 
@@ -136,8 +140,8 @@ public class FacturaServiceImpl implements FacturaService {
         return  tasaDescontada*100;
     }
 
-    public Double calcularTCEA(Double valueReceived, Double valueDelivered, Integer days){
-        Double tcea = Math.pow((valueDelivered/valueReceived), (360/(double)days));
+    public Double calcularTCEA(Double valueReceived, Double valueDelivered, Integer days, Integer dayByYear){
+        Double tcea = Math.pow((valueDelivered/valueReceived), ((double)dayByYear/(double)days));
         tcea = tcea -1;
         return  tcea*100;
     }
@@ -172,8 +176,17 @@ public class FacturaServiceImpl implements FacturaService {
     }
 
     @Override
-    public List<FacturaEntity> getByState(String state) {
-        return facturaRepository.findByState(state);
+    public List<FacturaSummaryDTO> getByState(String state) {
+        List<FacturaEntity> list = facturaRepository.findByState(state);
+        List<FacturaSummaryDTO> listSummary = new ArrayList<>();
+        for(FacturaEntity fact : list){
+            FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
+                    null, fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
+                    fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
+                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea());
+            listSummary.add(facturaSummaryDTO);
+        }
+        return listSummary;
     }
 
     @Override
@@ -190,9 +203,12 @@ public class FacturaServiceImpl implements FacturaService {
     public FacturaResponseDTO simularFactura(Integer id, FacturaRequestDTO facturaRequestDTO) {
         FacturaEntity facturaFound = getFacturaById(id);
 
+        Integer dayYear = facturaRequestDTO.getDayByYear();
         Double totalInvoiced = facturaFound.getTotalInvoiced();
+        Double nominalValue = facturaFound.getNominalValue();
         Integer days = calcularNumeroDias(facturaRequestDTO.getDiscountDate(), facturaRequestDTO.getPaymentDate());
         String type = facturaRequestDTO.getType();
+
         Double nuevaTasaEfectiva = 0.0;
         if(type.equals("E")){
             nuevaTasaEfectiva = calcularNuevaTasaEfectiva(facturaRequestDTO.getEffectiveRate(), facturaRequestDTO.getRateTerm(), days);
@@ -204,9 +220,9 @@ public class FacturaServiceImpl implements FacturaService {
         nuevaTasaEfectiva = redondear(nuevaTasaEfectiva,7);
         Double tasaDescontada = calcularTasaDescontada(nuevaTasaEfectiva);
         tasaDescontada = redondear(tasaDescontada,7);
-        Double discount = totalInvoiced*tasaDescontada/100;
+        Double discount = nominalValue*tasaDescontada/100;
         discount = redondear(discount,2);
-        Double netWorth = totalInvoiced - discount;
+        Double netWorth = nominalValue - discount;
         netWorth = redondear(netWorth,2);
         Double initialCosts = 0.0;
         for (Double cost : facturaRequestDTO.getInitialCosts()) {
@@ -219,14 +235,14 @@ public class FacturaServiceImpl implements FacturaService {
         }
 
         Double valueReceived = netWorth - initialCosts - facturaRequestDTO.getRetention();
-        Double valueDelivered = totalInvoiced + finalCosts - facturaRequestDTO.getRetention();
+        Double valueDelivered = nominalValue + finalCosts - facturaRequestDTO.getRetention();
 
         valueReceived = redondear(valueReceived,2);
         valueDelivered = redondear(valueDelivered,2);
-        Double tcea = calcularTCEA(valueReceived,valueDelivered, days);
+        Double tcea = calcularTCEA(valueReceived,valueDelivered, days,dayYear);
         tcea = redondear(tcea,7);
 
-        FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced, facturaRequestDTO.getPaymentDate(),
+        FacturaResponseDTO facturaResponseDTO = new FacturaResponseDTO(facturaRequestDTO.getStartDate(), totalInvoiced,nominalValue, facturaRequestDTO.getPaymentDate(),
                 days, facturaRequestDTO.getRetention(), nuevaTasaEfectiva, tasaDescontada, discount, initialCosts, finalCosts,
                 netWorth, valueDelivered, valueReceived, tcea);
 
@@ -243,7 +259,9 @@ public class FacturaServiceImpl implements FacturaService {
             UsersEntity user = userRepository.findById(order.getUser().getId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
-                    user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());
+                    user.getUsername(), order.getOrderDate(),factura.getDiscountDate(),factura.getTotalInvoiced(), factura.getNominalValue(),factura.getPaymentDate(), factura.getDays(),
+                    factura.getRetention(),factura.getNewEffectiveRate(),factura.getDiscountedRate(), factura.getDiscount(),factura.getInitialCosts(),
+                    factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea());
 
             summaries.add(facturaSummaryDTO);
         }
@@ -257,16 +275,25 @@ public class FacturaServiceImpl implements FacturaService {
         UsersEntity user = userRepository.findById(order.getUser().getId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
-                user.getUsername(), order.getOrderDate(),factura.getTotalInvoiced());
+                user.getUsername(), order.getOrderDate(),factura.getDiscountDate(),factura.getTotalInvoiced(), factura.getNominalValue(),factura.getPaymentDate(), factura.getDays(),
+                factura.getRetention(),factura.getNewEffectiveRate(),factura.getDiscountedRate(), factura.getDiscount(),factura.getInitialCosts(),
+                factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea());
 
         return facturaSummaryDTO;
     }
 
     @Override
-    public Double getTCEACartera(List<Integer> idFacturas) {
+    public TCEACarteraDTO getTCEACartera(List<Integer> idFacturas) {
+        Double totalValueReceived = 0.0;
         List<Double> flujos = new ArrayList<>();
         List<Integer> dias = new ArrayList<>();
+        Integer dayByYear = getFacturaById(idFacturas.get(0)).getDayByYear();
         double precision = 0.00000001;
+
+        for (Integer id : idFacturas) {
+            FacturaEntity factura = getFacturaById(id);
+            totalValueReceived += factura.getValueReceived();
+        }
 
         for (Integer id : idFacturas) {
             FacturaEntity factura = getFacturaById(id);
@@ -281,18 +308,19 @@ public class FacturaServiceImpl implements FacturaService {
         double tirmMedio;
         int maxIteraciones = 10000;
         int iteracion = 0;
+        double result = 0.0;
 
         while (iteracion < maxIteraciones) {
             tirmMedio = (tirmMin + tirmMax) / 2.0;
             double flujoDescontado = 0.0;
 
             for (int i = 0; i < flujos.size(); i++) {
-                flujoDescontado += flujos.get(i) / Math.pow(1 + tirmMedio, (double) dias.get(i) / 360.0);
+                flujoDescontado += flujos.get(i) / Math.pow(1 + tirmMedio, (double) dias.get(i) / (double)dayByYear);
             }
 
             if (Math.abs(flujoDescontado) < precision) {
-                BigDecimal result = new BigDecimal(tirmMedio * 100).setScale(7, RoundingMode.HALF_UP);
-                return result.doubleValue();
+                result = tirmMedio * 100;
+                break;
             }
 
             if (flujoDescontado > 0) {
@@ -303,6 +331,30 @@ public class FacturaServiceImpl implements FacturaService {
 
             iteracion++;
         }
-        return null;
+
+        TCEACarteraDTO tceaCarteraDTO = new TCEACarteraDTO(redondear(totalValueReceived,2),redondear(result,7));
+        return tceaCarteraDTO;
+    }
+
+    @Override
+    public List<FacturaSummaryDTO> findFacturasCartera(Integer facturaId) {
+        FacturaEntity factura = getFacturaById(facturaId);
+        List<FacturaEntity> list = facturaRepository.findFacturasCartera("ACEPTADO",
+                factura.getDayByYear(),
+                factura.getDiscountDate(),
+                factura.getEffectiveRate(),
+                factura.getRateTerm(),
+                factura.getInitialCosts(),
+                factura.getFinalCosts());
+        list.removeIf(f -> f.getId().equals(facturaId));
+        List<FacturaSummaryDTO> listSummary = new ArrayList<>();
+        for(FacturaEntity fact : list){
+            FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
+                    null, fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
+                    fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
+                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea());
+            listSummary.add(facturaSummaryDTO);
+        }
+        return listSummary;
     }
 }

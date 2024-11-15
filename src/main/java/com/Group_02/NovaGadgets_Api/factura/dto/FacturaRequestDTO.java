@@ -31,7 +31,6 @@ public class FacturaRequestDTO {
     @NotNull(message = "DiscountDate cannot be null")
     private LocalDate discountDate;
 
-    @Positive(message = "Retention must be positive")
     @NotNull(message = "Retention cannot be null")
     private Double retention;
 
@@ -50,7 +49,7 @@ public class FacturaRequestDTO {
     private Integer rateTerm;
 
     @NotNull(message = "DayByYear cannot be null")
-    private String dayByYear;
+    private Integer dayByYear;
 
     @NotNull(message = "InitialCosts cannot be null")
     private List<Double> initialCosts;

@@ -17,6 +17,7 @@ import java.time.LocalDate;
 public class FacturaResponseDTO {
     private LocalDate startDate;
     private Double totalInvoiced;
+    private Double nominalValue;
     private LocalDate paymentDate;
     private Integer days;
     private Double retention;

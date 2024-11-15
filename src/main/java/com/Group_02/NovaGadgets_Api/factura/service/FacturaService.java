@@ -3,6 +3,7 @@ package com.Group_02.NovaGadgets_Api.factura.service;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.TCEACarteraDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
 
@@ -19,7 +20,7 @@ public interface FacturaService {
 
     public abstract List<FacturaEntity> getAll();
 
-    public abstract List<FacturaEntity> getByState(String state);
+    public abstract List<FacturaSummaryDTO> getByState(String state);
 
     public abstract List<FacturaEntity> findFacturasByUserId(Integer id);
 
@@ -31,5 +32,6 @@ public interface FacturaService {
 
     public abstract FacturaSummaryDTO getFacturaSummary(Integer id);
 
-    public abstract Double getTCEACartera(List<Integer> idFacturas);
+    public abstract TCEACarteraDTO getTCEACartera(List<Integer> idFacturas);
+    public abstract List<FacturaSummaryDTO> findFacturasCartera(Integer facturaId);
 }

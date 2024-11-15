@@ -3,6 +3,7 @@ package com.Group_02.NovaGadgets_Api.factura.controller;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
 import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.TCEACarteraDTO;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
 import jakarta.validation.Valid;
@@ -31,8 +32,8 @@ public class FacturaController {
     }
 
     @GetMapping("/facturas/state/{state}")
-    public ResponseEntity<List<FacturaEntity>> getAllFacturasByState(@PathVariable("state") String state){
-        return new ResponseEntity<List<FacturaEntity>>(facturaService.getByState(state), HttpStatus.OK);
+    public ResponseEntity<List<FacturaSummaryDTO>> getAllFacturasByState(@PathVariable("state") String state){
+        return new ResponseEntity<List<FacturaSummaryDTO>>(facturaService.getByState(state), HttpStatus.OK);
     }
 
     @DeleteMapping("/facturas/{id}")
@@ -67,7 +68,12 @@ public class FacturaController {
     }
 
     @PostMapping("/facturas/TCEACartera")
-    public ResponseEntity<Double> getTCEACarteraFactura(@RequestBody List<Integer> idFacturas){
-        return new ResponseEntity<Double>(facturaService.getTCEACartera(idFacturas), HttpStatus.OK);
+    public ResponseEntity<TCEACarteraDTO> getTCEACarteraFactura(@RequestBody List<Integer> idFacturas){
+        return new ResponseEntity<TCEACarteraDTO>(facturaService.getTCEACartera(idFacturas), HttpStatus.OK);
+    }
+
+    @GetMapping("/facturas/cartera/{id}")
+    public ResponseEntity<List<FacturaSummaryDTO>> findFacturasCartera(@PathVariable("id")Integer id){
+        return new ResponseEntity<List<FacturaSummaryDTO>>(facturaService.findFacturasCartera(id), HttpStatus.OK);
     }
 }
