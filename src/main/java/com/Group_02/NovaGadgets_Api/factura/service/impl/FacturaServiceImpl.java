@@ -1,12 +1,15 @@
 package com.Group_02.NovaGadgets_Api.factura.service.impl;
 
-import com.Group_02.NovaGadgets_Api.factura.dto.FacturaRequestDTO;
-import com.Group_02.NovaGadgets_Api.factura.dto.FacturaResponseDTO;
-import com.Group_02.NovaGadgets_Api.factura.dto.FacturaSummaryDTO;
-import com.Group_02.NovaGadgets_Api.factura.dto.TCEACarteraDTO;
+import com.Group_02.NovaGadgets_Api.factura.dto.*;
 import com.Group_02.NovaGadgets_Api.factura.model.FacturaEntity;
+import com.Group_02.NovaGadgets_Api.factura.model.FinalCostEntity;
+import com.Group_02.NovaGadgets_Api.factura.model.InitialCostEntity;
 import com.Group_02.NovaGadgets_Api.factura.repository.FacturaRepository;
+import com.Group_02.NovaGadgets_Api.factura.repository.FinalCostRepository;
+import com.Group_02.NovaGadgets_Api.factura.repository.InitialCostRepository;
 import com.Group_02.NovaGadgets_Api.factura.service.FacturaService;
+import com.Group_02.NovaGadgets_Api.factura.service.FinalCostService;
+import com.Group_02.NovaGadgets_Api.factura.service.InitialCostService;
 import com.Group_02.NovaGadgets_Api.order.model.OrderEntity;
 import com.Group_02.NovaGadgets_Api.order.repository.OrderRepository;
 import com.Group_02.NovaGadgets_Api.shared.exception.ResourceNotFoundException;
@@ -20,6 +23,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -32,6 +36,18 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private InitialCostService initialCostService;
+
+    @Autowired
+    private FinalCostService finalCostService;
+
+    @Autowired
+    private InitialCostRepository initialCostRepository;
+
+    @Autowired
+    private FinalCostRepository finalCostRepository;
 
     @Override
     public void addFactura(Double totalInvoiced, OrderEntity order) {
@@ -69,14 +85,30 @@ public class FacturaServiceImpl implements FacturaService {
         Double netWorth = nominalValue - discount;
         netWorth = redondear(netWorth,2);
         Double initialCosts = 0.0;
-        for (Double cost : facturaRequestDTO.getInitialCosts()) {
-            initialCosts += cost;
+
+        for (CostDTO costDTO : facturaRequestDTO.getInitialCosts()) {
+            initialCostService.addInitialCost(costDTO,facturaFound);
+            if(costDTO.getType().equals("E")){
+                initialCosts += costDTO.getValue();
+            }
+            else{
+                initialCosts += ((costDTO.getValue()/100)*nominalValue);
+            }
+
         }
+        initialCosts = redondear(initialCosts,2);
 
         Double finalCosts = 0.0;
-        for (Double cost : facturaRequestDTO.getFinalCosts()) {
-            finalCosts += cost;
+        for (CostDTO costDTO : facturaRequestDTO.getFinalCosts()) {
+            finalCostService.addFinalCost(costDTO,facturaFound);
+            if(costDTO.getType().equals("E")){
+                finalCosts += costDTO.getValue();
+            }
+            else{
+                finalCosts += ((costDTO.getValue()/100)*nominalValue);
+            }
         }
+        finalCosts = redondear(finalCosts,2);
 
         Double valueReceived = netWorth - initialCosts - facturaRequestDTO.getRetention();
         Double valueDelivered = nominalValue + finalCosts - facturaRequestDTO.getRetention();
@@ -234,15 +266,27 @@ public class FacturaServiceImpl implements FacturaService {
         Double netWorth = nominalValue - discount;
         netWorth = redondear(netWorth,2);
         Double initialCosts = 0.0;
-        for (Double cost : facturaRequestDTO.getInitialCosts()) {
-            initialCosts += cost;
-        }
 
+        for (CostDTO costDTO : facturaRequestDTO.getInitialCosts()) {
+            if(costDTO.getType().equals("E")){
+                initialCosts += costDTO.getValue();
+            }
+            else{
+                initialCosts += ((costDTO.getValue()/100)*nominalValue);
+            }
+
+        }
+        initialCosts = redondear(initialCosts,2);
         Double finalCosts = 0.0;
-        for (Double cost : facturaRequestDTO.getFinalCosts()) {
-            finalCosts += cost;
+        for (CostDTO costDTO : facturaRequestDTO.getFinalCosts()) {
+            if(costDTO.getType().equals("E")){
+                finalCosts += costDTO.getValue();
+            }
+            else{
+                finalCosts += ((costDTO.getValue()/100)*nominalValue);
+            }
         }
-
+        finalCosts = redondear(finalCosts,2);
         Double valueReceived = netWorth - initialCosts - facturaRequestDTO.getRetention();
         Double valueDelivered = nominalValue + finalCosts - facturaRequestDTO.getRetention();
 
@@ -345,6 +389,68 @@ public class FacturaServiceImpl implements FacturaService {
         return tceaCarteraDTO;
     }
 
+    public boolean tienenMismosFinalCosts(FacturaEntity factura1, FacturaEntity factura2) {
+        // Obtener los costos finales de ambas facturas
+        List<FinalCostEntity> finalCosts1 = finalCostRepository.findByFactura_id(factura1.getId());
+        List<FinalCostEntity> finalCosts2 = finalCostRepository.findByFactura_id(factura2.getId());
+
+        // Si las listas tienen tamaños diferentes, no pueden ser iguales
+        if (finalCosts1.size() != finalCosts2.size()) {
+            return false;
+        }
+
+        Comparator<FinalCostEntity> comparator = Comparator
+                .comparing(FinalCostEntity::getName)
+                .thenComparing(FinalCostEntity::getType)
+                .thenComparing(FinalCostEntity::getValue);
+
+        finalCosts1.sort(comparator);
+        finalCosts2.sort(comparator);
+
+        // Comparar las listas elemento por elemento utilizando el Comparator
+        for (int i = 0; i < finalCosts1.size(); i++) {
+            FinalCostEntity cost1 = finalCosts1.get(i);
+            FinalCostEntity cost2 = finalCosts2.get(i);
+
+            // Si los objetos no son iguales según el Comparator, devolver false
+            if (comparator.compare(cost1, cost2) != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public boolean tienenMismosInitialCosts(FacturaEntity factura1, FacturaEntity factura2) {
+        List<InitialCostEntity> initialCosts1 = initialCostRepository.findByFactura_id(factura1.getId());
+        List<InitialCostEntity> initialCosts2 = initialCostRepository.findByFactura_id(factura2.getId());
+
+        if (initialCosts1.size() != initialCosts2.size()) {
+            return false;
+        }
+
+        // Ordenar ambas listas con un Comparator explícito
+        Comparator<InitialCostEntity> comparator = Comparator
+                .comparing(InitialCostEntity::getName)
+                .thenComparing(InitialCostEntity::getType)
+                .thenComparing(InitialCostEntity::getValue);
+
+        initialCosts1.sort(comparator);
+        initialCosts2.sort(comparator);
+
+        // Comparar las listas elemento por elemento usando el Comparator
+        for (int i = 0; i < initialCosts1.size(); i++) {
+            InitialCostEntity cost1 = initialCosts1.get(i);
+            InitialCostEntity cost2 = initialCosts2.get(i);
+
+            if (comparator.compare(cost1, cost2) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public List<FacturaSummaryDTO> findFacturasCartera(Integer facturaId) {
         FacturaEntity factura = getFacturaById(facturaId);
@@ -352,12 +458,18 @@ public class FacturaServiceImpl implements FacturaService {
                 factura.getDayByYear(),
                 factura.getDiscountDate(),
                 factura.getEffectiveRate(),
-                factura.getRateTerm(),
-                factura.getInitialCosts(),
-                factura.getFinalCosts());
+                factura.getRateTerm());
+
         list.removeIf(f -> f.getId().equals(facturaId));
+        List<FacturaEntity> listValidada = new ArrayList<>();
+
+        for (FacturaEntity facturaFound: list){
+            if(tienenMismosInitialCosts(factura,facturaFound) && tienenMismosFinalCosts(factura,facturaFound)){
+                listValidada.add(facturaFound);
+            }
+        }
         List<FacturaSummaryDTO> listSummary = new ArrayList<>();
-        for(FacturaEntity fact : list){
+        for(FacturaEntity fact : listValidada){
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
                     factura.getOrder().getUser().getUsername(), fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
                     fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),

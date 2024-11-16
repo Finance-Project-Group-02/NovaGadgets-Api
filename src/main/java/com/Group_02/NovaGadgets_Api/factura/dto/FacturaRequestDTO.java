@@ -1,5 +1,7 @@
 package com.Group_02.NovaGadgets_Api.factura.dto;
 
+import com.Group_02.NovaGadgets_Api.factura.model.FinalCostEntity;
+import com.Group_02.NovaGadgets_Api.factura.model.InitialCostEntity;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -52,8 +54,8 @@ public class FacturaRequestDTO {
     private Integer dayByYear;
 
     @NotNull(message = "InitialCosts cannot be null")
-    private List<Double> initialCosts;
+    private List<CostDTO> initialCosts;
 
     @NotNull(message = "FinalCosts cannot be null")
-    private List<Double> finalCosts;
+    private List<CostDTO> finalCosts;
 }

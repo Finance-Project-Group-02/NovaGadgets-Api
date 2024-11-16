@@ -30,14 +30,10 @@ public interface FacturaRepository extends JpaRepository<FacturaEntity,Integer> 
             "AND f.discount_date = :discountDate " +
             "AND f.day_by_year = :dayByYear " +
             "AND f.effective_rate = :effectiveRate " +
-            "AND f.rate_term = :rateTerm " +
-            "AND f.initial_costs = :initialCosts " +
-            "AND f.final_costs = :finalCosts")
+            "AND f.rate_term = :rateTerm ")
     List<FacturaEntity> findFacturasCartera(@Param("state") String state,
                                             @Param("dayByYear") Integer dayByYear,
                                             @Param("discountDate") LocalDate discountDate,
                                             @Param("effectiveRate") Double effectiveRate,
-                                            @Param("rateTerm") Integer rateTerm,
-                                            @Param("initialCosts") Double initialCosts,
-                                            @Param("finalCosts") Double finalCosts);
+                                            @Param("rateTerm") Integer rateTerm);
 }
