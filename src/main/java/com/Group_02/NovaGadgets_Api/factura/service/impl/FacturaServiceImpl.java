@@ -181,7 +181,7 @@ public class FacturaServiceImpl implements FacturaService {
         List<FacturaSummaryDTO> listSummary = new ArrayList<>();
         for(FacturaEntity fact : list){
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
-                    null, fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
+                    fact.getOrder().getUser().getUsername(), fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
                     fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
                     fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea(),fact.getStartDate());
             listSummary.add(facturaSummaryDTO);
@@ -190,8 +190,17 @@ public class FacturaServiceImpl implements FacturaService {
     }
 
     @Override
-    public List<FacturaEntity> findFacturasByUserId(Integer id) {
-        return facturaRepository.findFacturasByUserId(id);
+    public List<FacturaSummaryDTO> findFacturasByUserId(Integer id){
+        List<FacturaEntity> list = facturaRepository.findFacturasByUserId(id);
+        List<FacturaSummaryDTO> listSummary = new ArrayList<>();
+        for(FacturaEntity fact : list){
+            FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
+                    fact.getOrder().getUser().getUsername(), fact.getOrder().getOrderDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
+                    fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
+                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea(),fact.getStartDate());
+            listSummary.add(facturaSummaryDTO);
+        }
+        return listSummary;
     }
 
     @Override

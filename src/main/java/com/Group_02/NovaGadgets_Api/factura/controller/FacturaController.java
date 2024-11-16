@@ -43,8 +43,8 @@ public class FacturaController {
     }
 
     @GetMapping("/facturas/user/{id}")
-    public ResponseEntity<List<FacturaEntity>> getFacturasByUserId(@PathVariable("id") Integer id){
-        return new ResponseEntity<List<FacturaEntity>>(facturaService.findFacturasByUserId(id), HttpStatus.OK);
+    public ResponseEntity<List<FacturaSummaryDTO>> getFacturasByUserId(@PathVariable("id") Integer id){
+        return new ResponseEntity<List<FacturaSummaryDTO>>(facturaService.findFacturasByUserId(id), HttpStatus.OK);
     }
 
     @GetMapping("/facturas/user/{id}/state/{state}")

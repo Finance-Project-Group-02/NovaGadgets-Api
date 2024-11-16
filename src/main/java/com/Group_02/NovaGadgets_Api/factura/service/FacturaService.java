@@ -22,7 +22,7 @@ public interface FacturaService {
 
     public abstract List<FacturaSummaryDTO> getByState(String state);
 
-    public abstract List<FacturaEntity> findFacturasByUserId(Integer id);
+    public abstract List<FacturaSummaryDTO> findFacturasByUserId(Integer id);
 
     public abstract List<FacturaEntity> findFacturasByUserIdAndState(Integer id, String state);
 
