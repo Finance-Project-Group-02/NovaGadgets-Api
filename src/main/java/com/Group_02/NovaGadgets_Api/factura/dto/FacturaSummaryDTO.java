@@ -34,4 +34,5 @@ public class FacturaSummaryDTO {
     private Double valueDelivered;
     private Double valueReceived;
     private Double tcea;
+    private LocalDate startDate;
 }

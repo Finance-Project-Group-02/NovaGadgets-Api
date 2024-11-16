@@ -183,7 +183,7 @@ public class FacturaServiceImpl implements FacturaService {
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
                     null, fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
                     fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
-                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea());
+                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea(),fact.getStartDate());
             listSummary.add(facturaSummaryDTO);
         }
         return listSummary;
@@ -261,7 +261,7 @@ public class FacturaServiceImpl implements FacturaService {
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
                     user.getUsername(), order.getOrderDate(),factura.getDiscountDate(),factura.getTotalInvoiced(), factura.getNominalValue(),factura.getPaymentDate(), factura.getDays(),
                     factura.getRetention(),factura.getNewEffectiveRate(),factura.getDiscountedRate(), factura.getDiscount(),factura.getInitialCosts(),
-                    factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea());
+                    factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea(),factura.getStartDate());
 
             summaries.add(facturaSummaryDTO);
         }
@@ -277,7 +277,7 @@ public class FacturaServiceImpl implements FacturaService {
         FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(factura.getId(), factura.getState(),
                 user.getUsername(), order.getOrderDate(),factura.getDiscountDate(),factura.getTotalInvoiced(), factura.getNominalValue(),factura.getPaymentDate(), factura.getDays(),
                 factura.getRetention(),factura.getNewEffectiveRate(),factura.getDiscountedRate(), factura.getDiscount(),factura.getInitialCosts(),
-                factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea());
+                factura.getFinalCosts(),factura.getNetWorth(),factura.getValueDelivered(),factura.getValueReceived(),factura.getTcea(),factura.getStartDate());
 
         return facturaSummaryDTO;
     }
@@ -350,9 +350,9 @@ public class FacturaServiceImpl implements FacturaService {
         List<FacturaSummaryDTO> listSummary = new ArrayList<>();
         for(FacturaEntity fact : list){
             FacturaSummaryDTO facturaSummaryDTO = new FacturaSummaryDTO(fact.getId(), fact.getState(),
-                    null, fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
+                    factura.getOrder().getUser().getUsername(), fact.getStartDate(),fact.getDiscountDate(),fact.getTotalInvoiced(), fact.getNominalValue(),fact.getPaymentDate(), fact.getDays(),
                     fact.getRetention(),fact.getNewEffectiveRate(),fact.getDiscountedRate(), fact.getDiscount(),fact.getInitialCosts(),
-                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea());
+                    fact.getFinalCosts(),fact.getNetWorth(),fact.getValueDelivered(),fact.getValueReceived(),fact.getTcea(),fact.getStartDate());
             listSummary.add(facturaSummaryDTO);
         }
         return listSummary;
