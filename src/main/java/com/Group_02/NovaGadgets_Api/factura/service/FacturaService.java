@@ -33,5 +33,6 @@ public interface FacturaService {
     public abstract FacturaSummaryDTO getFacturaSummary(Integer id);
 
     public abstract TCEACarteraDTO getTCEACartera(List<Integer> idFacturas);
+
     public abstract List<FacturaSummaryDTO> findFacturasCartera(Integer facturaId);
 }
