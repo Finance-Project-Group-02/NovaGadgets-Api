@@ -54,7 +54,7 @@ public class FacturaServiceImpl implements FacturaService {
         FacturaEntity factura = new FacturaEntity();
         factura.setState("PENDIENTE");
         factura.setTotalInvoiced(totalInvoiced);
-        factura.setNominalValue(redondear(totalInvoiced*0.82,2));
+        factura.setNominalValue(redondear(totalInvoiced/1.18,2));
         factura.setOrder(order);
         facturaRepository.save(factura);
     }
@@ -92,7 +92,7 @@ public class FacturaServiceImpl implements FacturaService {
                 initialCosts += costDTO.getValue();
             }
             else{
-                initialCosts += ((costDTO.getValue()/100)*nominalValue);
+                initialCosts += ((costDTO.getValue()/(100*dayYear)*days)*nominalValue);
             }
 
         }
@@ -272,7 +272,7 @@ public class FacturaServiceImpl implements FacturaService {
                 initialCosts += costDTO.getValue();
             }
             else{
-                initialCosts += ((costDTO.getValue()/100)*nominalValue);
+                initialCosts += ((costDTO.getValue()/(100*dayYear)*days)*nominalValue);
             }
 
         }
